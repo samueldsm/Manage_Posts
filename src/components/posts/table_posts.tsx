@@ -1,5 +1,5 @@
 "use client";
-// TODO: Decompose this urgent component !!!!!.
+// TODO: Decompose urgent this component !!!!!.
 
 import React, { useEffect } from "react";
 
@@ -13,18 +13,17 @@ import {
   TableHeader,
   TableColumn,
 } from "@nextui-org/table";
-
 import { Button } from "@nextui-org/button";
 import { Tooltip } from "@nextui-org/tooltip";
 import { Spinner } from "@nextui-org/spinner";
 import { Pagination } from "@nextui-org/pagination";
 
-import { EditIcon } from "../icons/edit_icon";
-import { DeleteIcon } from "../icons/delete_icon";
-
 import { Post } from "@/types/post";
 import { IPost } from "@/interfaces";
+
 import { columns } from "./columns";
+import { EditIcon } from "../icons/edit_icon";
+import { DeleteIcon } from "../icons/delete_icon";
 
 export default function PostsTable({
   data,
@@ -38,16 +37,15 @@ export default function PostsTable({
   const [page, setPage] = React.useState(1);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  //API END_POINT
-  const END_POINT = "https://jsonplaceholder.typicode.com/posts";
+  const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
   /*  method: 'GET' */
   useEffect(() => {
+    const getDataApi = async () => {
+      const { data: res } = await axios.get(`${API_URL}`);
+      setData(res);
+    };
     try {
-      const getDataApi = async () => {
-        const { data: res } = await axios.get(END_POINT);
-        setData(res);
-      };
       getDataApi();
     } catch (error) {
       console.error(error);
@@ -62,14 +60,14 @@ export default function PostsTable({
   /* method: 'DELETE' */
   const deletePost = async (id: number) => {
     try {
-      await axios.delete(`${END_POINT}/${id}`);
+      await axios.delete(`${API_URL}/${id}`);
     } catch (error) {
       console.error(error);
     }
     handleData(id);
   };
   /* TODO: fixes the pagination, when starting the
-     rendering it repeats the value 1 in the component */
+     rendering it repeats the value 1 in this component */
   //Start Pagination
   const rowsPerPage = 4;
   const pages = Math.ceil(data.length / rowsPerPage);
@@ -143,48 +141,50 @@ export default function PostsTable({
   );
 
   return (
-    <Table
-      aria-label="List of"
-      bottomContent={
-        <div className="flex w-full justify-center">
-          <Pagination
-            isCompact
-            showControls
-            showShadow
-            color="secondary"
-            page={page}
-            total={pages}
-            onChange={(page) => setPage(page)}
-          />
-        </div>
-      }
-      classNames={{
-        wrapper: "min-h-[222px]",
-      }}
-    >
-      <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn
-            key={column.uid}
-            align={column.uid === "actions" ? "center" : "start"}
-          >
-            {column.name}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody
-        items={items}
-        isLoading={isLoading && !items.length}
-        loadingContent={<Spinner />}
+    <>
+      <Table
+        aria-label="List of"
+        bottomContent={
+          <div className="flex w-full justify-center">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              color="secondary"
+              page={page}
+              total={pages}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
+        }
+        classNames={{
+          wrapper: "min-h-[222px]",
+        }}
       >
-        {(items) => (
-          <TableRow key={items.id}>
-            {(columnKey) => (
-              <TableCell>{renderCell(items, columnKey)}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+        <TableHeader columns={columns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+            >
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody
+          items={items}
+          isLoading={isLoading && !items.length}
+          loadingContent={<Spinner />}
+        >
+          {(items) => (
+            <TableRow key={items.id}>
+              {(columnKey) => (
+                <TableCell>{renderCell(items, columnKey)}</TableCell>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </>
   );
 }

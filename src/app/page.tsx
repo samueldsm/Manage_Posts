@@ -5,10 +5,11 @@ import React, { useState } from "react";
 import { useDisclosure } from "@nextui-org/use-disclosure";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 
-import PostModal from "@/components/modals/add_post_modal";
 import PostsTable from "@/components/posts/table_posts";
 import NotifyChip from "@/components/chip/notify";
 import DelPostModal from "@/components/modals/del_post_modal";
+import AddPostModal from "@/components/modals/add_post_modal";
+import FormPostButton from "@/components/modals/button_form_post";
 
 import { IPost } from "@/interfaces";
 
@@ -16,8 +17,13 @@ export default function HomePage() {
   const [data, setData] = useState<IPost[]>([]);
   const [visible, setVisible] = React.useState(false);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
-
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [initialData, setInitialData] = useState<IPost>({
+    id: 0,
+    body: "",
+    title: "",
+    userId: 0,
+  });
+  const { isOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
@@ -27,17 +33,22 @@ export default function HomePage() {
         </CardHeader>
 
         <CardBody>
-          <PostModal isFormOpen={isFormOpen} setIsFormOpen={setIsFormOpen} />
+          <FormPostButton setIsFormOpen={setIsFormOpen} />
+
+          <AddPostModal
+            data={data}
+            setData={setData}
+            isFormOpen={isFormOpen}
+            setIsFormOpen={setIsFormOpen}
+            initialData={initialData}
+            setInitialData={setInitialData}
+          />
 
           {visible && <NotifyChip />}
 
           <PostsTable
             data={data}
-            isOpen={isOpen}
-            onOpen={onOpen}
             setData={setData}
-            isFormOpen={isFormOpen}
-            onOpenChange={onOpenChange}
             setIsFormOpen={setIsFormOpen}
           />
 
