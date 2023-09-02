@@ -50,6 +50,7 @@ export default function HomePage() {
             data={data}
             setData={setData}
             setIsFormOpen={setIsFormOpen}
+            setInitialData={setInitialData}
           />
 
           {/* TODO: Use this modal to confirm the deletion */}

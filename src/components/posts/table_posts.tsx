@@ -18,7 +18,6 @@ import { Tooltip } from "@nextui-org/tooltip";
 import { Spinner } from "@nextui-org/spinner";
 import { Pagination } from "@nextui-org/pagination";
 
-import { Post } from "@/types/post";
 import { IPost } from "@/interfaces";
 
 import { columns } from "./columns";
@@ -29,40 +28,41 @@ export default function PostsTable({
   data,
   setData,
   setIsFormOpen,
+  setInitialData,
 }: {
   data: IPost[];
   setData: (arr: IPost[]) => void;
   setIsFormOpen: (value: boolean) => void;
+  setInitialData: (post: IPost) => void;
 }) {
   const [page, setPage] = React.useState(1);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
-  /*  method: 'GET' */
-  useEffect(() => {
-    const getDataApi = async () => {
-      const { data: res } = await axios.get(`${API_URL}`);
-      setData(res);
-    };
-    try {
-      getDataApi();
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
-
   /* Refresh posts */
   const handleData = (id: number) => {
     setData(data.filter((item) => item.id !== id));
   };
+  /*  method: 'GET' */
+  useEffect(() => {
+    const getPost = async () => {
+      const { data: res } = await axios.get(`${API_URL}`);
+      setData(res);
+    };
+    try {
+      getPost();
+    } catch (error) {
+      console.error("Error fetching posts: ", error);
+    }
+  }, []);
 
   /* method: 'DELETE' */
   const deletePost = async (id: number) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
     } catch (error) {
-      console.error(error);
+      console.error("Error deleting post: ", error);
     }
     handleData(id);
   };
@@ -81,10 +81,15 @@ export default function PostsTable({
 
   //END Pagination
 
+  const handleUpdate = (id: number) => {
+    setIsFormOpen(true);
+    setInitialData(data.find((post) => post.id === id) as IPost);
+  };
+
   // Render Cell Post
   const renderCell = React.useCallback(
-    (data: Post, columnKey: React.Key) => {
-      const cellValue = data[columnKey as keyof Post];
+    (data: IPost, columnKey: React.Key) => {
+      const cellValue = data[columnKey as keyof IPost];
 
       switch (columnKey) {
         case "id":
@@ -112,7 +117,7 @@ export default function PostsTable({
                 <Button
                   type="button"
                   variant="light"
-                  onPress={() => setIsFormOpen(true)}
+                  onPress={() => handleUpdate(data.id)}
                 >
                   <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                     <EditIcon />
@@ -147,13 +152,13 @@ export default function PostsTable({
         bottomContent={
           <div className="flex w-full justify-center">
             <Pagination
-              isCompact
-              showControls
-              showShadow
-              color="secondary"
               page={page}
               total={pages}
+              color="secondary"
               onChange={(page) => setPage(page)}
+              isCompact
+              showShadow
+              showControls
             />
           </div>
         }

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 import {
   Modal,
@@ -16,8 +17,6 @@ import { useForm } from "react-hook-form";
 
 import { IPost } from "@/interfaces";
 import { validateTrim } from "@/util/validation";
-import axios from "axios";
-import { data } from "autoprefixer";
 
 export default function AddPostModal({
   data,
@@ -34,10 +33,15 @@ export default function AddPostModal({
   setIsFormOpen: (value: boolean) => void;
   setInitialData: (post: IPost) => void;
 }) {
+  const API_URL = "https://jsonplaceholder.typicode.com/posts";
+
   const [titleVal, setTitleVal] = useState<string>("");
   const [bodyVal, setBodyVal] = useState<string>("");
 
-  const API_URL = "https://jsonplaceholder.typicode.com/posts";
+  useEffect(() => {
+    initialData.title && setTitleVal(initialData.title);
+    initialData.body && setBodyVal(initialData.body);
+  }, [initialData.title, initialData.body]);
 
   // Validation not only whitespace
   const validateInput = (value: string) => validateTrim(value);
@@ -71,11 +75,9 @@ export default function AddPostModal({
       userId: 1,
     };
     try {
-      const response = await axios.post(API_URL, tempPost);
-      //POST successfully
-      console.log("POST: ", response.data);
+      await axios.post(API_URL, tempPost);
     } catch (error) {
-      console.error(error);
+      console.error("Error in POST method", error);
     }
     // Always id= 140 Maybe its can throw an exception.
     setData([
@@ -87,8 +89,40 @@ export default function AddPostModal({
     ]);
   };
 
-  const onSubmit = () => {
-    createPost();
+  /*  method: 'PUT' */
+  const updatePost = async () => {
+    const seed = {
+      id: initialData.id,
+      title: titleVal,
+      body: bodyVal,
+      userId: initialData.userId,
+    } as IPost;
+
+    try {
+      await axios.put(`${API_URL}/${seed.id}`, seed);
+    } catch (error) {
+      console.log("Error in PUT method", error);
+    }
+    const temp = [...data];
+    const index = temp.indexOf(initialData);
+    temp[index] = { ...initialData, title: titleVal, body: bodyVal };
+    setData(temp);
+  };
+
+  const onSubmit = async () => {
+    if (initialData.id) {
+      try {
+        await updatePost();
+      } catch (error) {
+        console.log("Error during update: ", error);
+      }
+    } else {
+      try {
+        await createPost();
+      } catch (error) {
+        console.log("Error during creation: ", error);
+      }
+    }
     handleCancel();
   };
 
@@ -119,14 +153,14 @@ export default function AddPostModal({
               value={titleVal}
               variant="bordered"
               autoFocus
-              maxLength={50}
+              maxLength={250}
               minLength={1}
               placeholder="Enter a title"
               {...register("title", {
                 required: "Title is required",
                 maxLength: {
-                  value: 50,
-                  message: "The name cannot be longer than 50 characters.",
+                  value: 250,
+                  message: "The name cannot be longer than 250 characters.",
                 },
                 minLength: {
                   value: 1,
