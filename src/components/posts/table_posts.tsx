@@ -17,7 +17,6 @@ import { Button } from "@nextui-org/button";
 import { Tooltip } from "@nextui-org/tooltip";
 import { Spinner } from "@nextui-org/spinner";
 import { Pagination } from "@nextui-org/pagination";
-import { getKeyValue } from "@nextui-org/react";
 
 import { IPost } from "@/interfaces";
 
@@ -51,19 +50,21 @@ export default function PostsTable({
 
   const pages = useMemo(() => {
     return data?.length ? Math.ceil(data.length / rowsPerPage) : 0;
-  }, [data?.length, rowsPerPage]);
+  }, [data, data?.length]);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
     return data.slice(start, end);
-  }, [page, data?.length, rowsPerPage]);
+  }, [page, data?.length, data]);
   //END Pagination
 
   /* Refresh posts */
   const handleData = (id: number) => {
+    console.log(data.filter((item) => item.id !== id));
     setData(data.filter((item) => item.id !== id));
+    return;
   };
   /*  method: 'GET' */
   useEffect(() => {
@@ -82,7 +83,7 @@ export default function PostsTable({
   const deletePost = async (id: number) => {
     axios
       .delete(`${API_URL}/${id}`)
-      .then((response) => {
+      .then(() => {
         handleData(id);
         toast.success("Post deleted successfully ", {
           theme: "dark",
@@ -171,57 +172,54 @@ export default function PostsTable({
           return cellValue;
       }
     },
-    [data.length]
+    [data.length, data]
   );
 
   return (
-    <>
-      <Table
-        aria-label="List of"
-        bottomContent={
-          pages > 0 ? (
-            <div className="flex w-full justify-center">
-              <Pagination
-                isCompact
-                showControls
-                showShadow
-                color="primary"
-                page={page}
-                total={pages}
-                onChange={(page) => setPage(page)}
-              />
-            </div>
-          ) : null
-        }
-        // {...args}
-        classNames={{
-          wrapper: "min-h-[222px]",
-        }}
+    <Table
+      aria-label="List of posts"
+      bottomContent={
+        pages > 0 ? (
+          <div className="flex w-full justify-center">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              color="primary"
+              page={page}
+              total={pages}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
+        ) : null
+      }
+      classNames={{
+        wrapper: "min-h-[222px]",
+      }}
+    >
+      <TableHeader columns={columns}>
+        {(column) => (
+          <TableColumn
+            key={column.uid}
+            align={column.uid === "actions" ? "center" : "start"}
+          >
+            {column.name}
+          </TableColumn>
+        )}
+      </TableHeader>
+      <TableBody
+        items={items}
+        isLoading={isLoading && !items.length}
+        loadingContent={<Spinner />}
       >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn
-              key={column.uid}
-              align={column.uid === "actions" ? "center" : "start"}
-            >
-              {column.name}
-            </TableColumn>
-          )}
-        </TableHeader>
-        <TableBody
-          items={items}
-          isLoading={isLoading && !items.length}
-          loadingContent={<Spinner />}
-        >
-          {(items) => (
-            <TableRow key={items.id}>
-              {(columnKey) => (
-                <TableCell>{renderCell(items, columnKey)}</TableCell>
-              )}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </>
+        {(items) => (
+          <TableRow key={items.id}>
+            {(columnKey) => (
+              <TableCell>{renderCell(items, columnKey)}</TableCell>
+            )}
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
   );
 }
