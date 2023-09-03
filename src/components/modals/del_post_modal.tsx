@@ -12,17 +12,11 @@ import {
 
 import { Button } from "@nextui-org/button";
 
-export default function DelPostModal({
-  isOpen,
-  onOpenChange,
-}: {
-  isOpen: boolean;
-  onOpenChange: () => void;
-}) {
+export default function DelPostModal() {
   return (
     <>
       <Modal
-        isOpen={isOpen}
+        // isOpen={isOpen}
         backdrop="blur"
         classNames={{
           body: "py-6",
@@ -32,7 +26,7 @@ export default function DelPostModal({
           backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
           closeButton: "hover:bg-white/5 active:bg-white/10",
         }}
-        onOpenChange={onOpenChange}
+        // onOpenChange={onOpenChange}
       >
         <ModalContent>
           {(onClose) => (

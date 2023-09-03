@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+// import toast from "@/components/toast";
 
 import { useDisclosure } from "@nextui-org/use-disclosure";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 
+import Notify from "@/components/chip/notify";
 import PostsTable from "@/components/posts/table_posts";
-import NotifyChip from "@/components/chip/notify";
-import DelPostModal from "@/components/modals/del_post_modal";
 import AddPostModal from "@/components/modals/add_post_modal";
 import FormPostButton from "@/components/modals/button_form_post";
 
@@ -15,7 +15,6 @@ import { IPost } from "@/interfaces";
 
 export default function HomePage() {
   const [data, setData] = useState<IPost[]>([]);
-  const [visible, setVisible] = React.useState(false);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [initialData, setInitialData] = useState<IPost>({
     id: 0,
@@ -24,6 +23,7 @@ export default function HomePage() {
     userId: 0,
   });
   const { isOpen, onOpenChange } = useDisclosure();
+  const [notification, setNotification] = useState(true);
 
   return (
     <>
@@ -44,17 +44,15 @@ export default function HomePage() {
             setInitialData={setInitialData}
           />
 
-          {visible && <NotifyChip />}
-
           <PostsTable
             data={data}
             setData={setData}
             setIsFormOpen={setIsFormOpen}
             setInitialData={setInitialData}
+            setNotification={setNotification}
           />
 
-          {/* TODO: Use this modal to confirm the deletion */}
-          <DelPostModal isOpen={isOpen} onOpenChange={onOpenChange} />
+          <Notify />
         </CardBody>
       </Card>
     </>

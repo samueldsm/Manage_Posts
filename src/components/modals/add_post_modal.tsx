@@ -13,6 +13,7 @@ import {
 import { Button } from "@nextui-org/button";
 import { Input, Textarea } from "@nextui-org/input";
 
+import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 
 import { IPost } from "@/interfaces";
@@ -53,10 +54,11 @@ export default function AddPostModal({
     formState: { errors },
   } = useForm();
 
-  /*If it is closed by accident, the status of the post is not lost,
-  it is only lost when clicking cancel*/
   function handleFormClose(): void {
+    setBodyVal("");
+    setTitleVal("");
     setIsFormOpen(false);
+    setInitialData({ userId: 0, title: "", body: "", id: 0 });
     reset();
   }
   const handleCancel = () => {
@@ -74,19 +76,41 @@ export default function AddPostModal({
       title: titleVal,
       userId: 1,
     };
-    try {
-      await axios.post(API_URL, tempPost);
-    } catch (error) {
-      console.error("Error in POST method", error);
-    }
-    // Always id= 140 Maybe its can throw an exception.
-    setData([
-      ...data,
-      {
-        ...tempPost,
-        id: 140,
-      },
-    ]);
+    axios
+      .post(API_URL, tempPost)
+      .then(() => {
+        // Always id = data.length + 1, Maybe it can throw an exception.It's only for test.
+        setData([
+          ...data,
+          {
+            ...tempPost,
+            id: data.length + 1,
+          },
+        ]);
+        toast.success("The post was created successfully", {
+          theme: "dark",
+          position: "bottom-right",
+          progress: undefined,
+          draggable: true,
+          autoClose: 5000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          hideProgressBar: false,
+        });
+      })
+      .catch((error) => {
+        console.error("Error in POST method", error);
+        toast.error("Error during insert", {
+          theme: "dark",
+          position: "bottom-right",
+          progress: undefined,
+          autoClose: 5000,
+          draggable: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          hideProgressBar: false,
+        });
+      });
   };
 
   /*  method: 'PUT' */
@@ -98,15 +122,37 @@ export default function AddPostModal({
       userId: initialData.userId,
     } as IPost;
 
-    try {
-      await axios.put(`${API_URL}/${seed.id}`, seed);
-    } catch (error) {
-      console.log("Error in PUT method", error);
-    }
-    const temp = [...data];
-    const index = temp.indexOf(initialData);
-    temp[index] = { ...initialData, title: titleVal, body: bodyVal };
-    setData(temp);
+    axios
+      .put(`${API_URL}/${seed.id}`, seed)
+      .then(() => {
+        const temp = [...data];
+        const index = temp.indexOf(initialData);
+        temp[index] = { ...initialData, title: titleVal, body: bodyVal };
+        setData(temp);
+        toast.success("The post was successfully updated", {
+          theme: "dark",
+          position: "bottom-right",
+          progress: undefined,
+          draggable: true,
+          autoClose: 5000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          hideProgressBar: false,
+        });
+      })
+      .catch((error) => {
+        console.log("Error in PUT method", error);
+        toast.error("Error during update", {
+          theme: "dark",
+          position: "bottom-right",
+          progress: undefined,
+          autoClose: 5000,
+          draggable: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          hideProgressBar: false,
+        });
+      });
   };
 
   const onSubmit = async () => {
@@ -130,20 +176,18 @@ export default function AddPostModal({
     <Modal
       isOpen={isFormOpen}
       onClose={handleFormClose}
-      // TODO: Fix backdrop="blur", it's not working
       backdrop="blur"
       classNames={{
         body: "py-6",
         base: "border-[#292f46] bg-[#19172c] dark:bg-[#19172c] text-[#a8b0d3]",
         header: "border-b-[1px] border-[#292f46]",
         footer: "border-t-[1px] border-[#292f46]",
-        backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
         closeButton: "hover:bg-white/5 active:bg-white/10",
       }}
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          Add a new Post
+          {initialData.title ? "Edit post" : "Add a new Post"}
         </ModalHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalBody>
@@ -202,14 +246,11 @@ export default function AddPostModal({
               type="submit"
               className="bg-[#6f4ef2] shadow-lg shadow-indigo-500/20"
             >
-              Add post
+              {initialData.title ? "Update post" : "Add post"}
             </Button>
           </ModalFooter>
         </form>
       </ModalContent>
     </Modal>
   );
-}
-function updatePost() {
-  throw new Error("Function not implemented.");
 }

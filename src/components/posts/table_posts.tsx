@@ -20,6 +20,7 @@ import { Pagination } from "@nextui-org/pagination";
 
 import { IPost } from "@/interfaces";
 
+import { toast } from "react-toastify";
 import { columns } from "./columns";
 import { EditIcon } from "../icons/edit_icon";
 import { DeleteIcon } from "../icons/delete_icon";
@@ -29,11 +30,13 @@ export default function PostsTable({
   setData,
   setIsFormOpen,
   setInitialData,
+  setNotification,
 }: {
   data: IPost[];
   setData: (arr: IPost[]) => void;
   setIsFormOpen: (value: boolean) => void;
   setInitialData: (post: IPost) => void;
+  setNotification: (value: boolean) => void;
 }) {
   const [page, setPage] = React.useState(1);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -46,11 +49,11 @@ export default function PostsTable({
   };
   /*  method: 'GET' */
   useEffect(() => {
-    const getPost = async () => {
-      const { data: res } = await axios.get(`${API_URL}`);
-      setData(res);
-    };
     try {
+      const getPost = async () => {
+        const { data: res } = await axios.get(`${API_URL}`);
+        setData(res);
+      };
       getPost();
     } catch (error) {
       console.error("Error fetching posts: ", error);
@@ -59,12 +62,34 @@ export default function PostsTable({
 
   /* method: 'DELETE' */
   const deletePost = async (id: number) => {
-    try {
-      await axios.delete(`${API_URL}/${id}`);
-    } catch (error) {
-      console.error("Error deleting post: ", error);
-    }
-    handleData(id);
+    axios
+      .delete(`${API_URL}/${id}`)
+      .then((response) => {
+        handleData(id);
+        toast.success("Post deleted successfully ", {
+          theme: "dark",
+          position: "bottom-right",
+          progress: undefined,
+          draggable: true,
+          autoClose: 5000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          hideProgressBar: false,
+        });
+      })
+      .catch((error) => {
+        console.error("Error deleting post: ", error);
+        toast.error("Error deleting post", {
+          theme: "dark",
+          position: "bottom-right",
+          progress: undefined,
+          autoClose: 5000,
+          draggable: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          hideProgressBar: false,
+        });
+      });
   };
   /* TODO: fixes the pagination, when starting the
      rendering it repeats the value 1 in this component */
