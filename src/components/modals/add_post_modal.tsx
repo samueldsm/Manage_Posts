@@ -36,8 +36,8 @@ export default function AddPostModal({
 }) {
   const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
-  const [titleVal, setTitleVal] = useState<string>("");
   const [bodyVal, setBodyVal] = useState<string>("");
+  const [titleVal, setTitleVal] = useState<string>("");
 
   useEffect(() => {
     initialData.title && setTitleVal(initialData.title);
@@ -194,12 +194,13 @@ export default function AddPostModal({
             <Input
               type="text"
               label="Title"
-              value={titleVal}
+              // value={titleVal}
               variant="bordered"
               autoFocus
               maxLength={250}
               minLength={1}
               placeholder="Enter a title"
+              defaultValue={initialData.title.length > 1 ? titleVal : ""}
               {...register("title", {
                 required: "Title is required",
                 maxLength: {
@@ -218,18 +219,16 @@ export default function AddPostModal({
               <p className="errorMessage">{errors.title.message}</p>
             )}
             <Textarea
+              type="text"
               key="bordered"
               label="Description"
-              value={bodyVal}
+              // value={bodyVal}
               variant="bordered"
               placeholder="Enter a description"
-              labelPlacement="outside"
+              defaultValue={initialData.body.length > 1 ? bodyVal : ""}
+              // labelPlacement="outside"
               {...register("body", {
                 required: "Description is required",
-                maxLength: {
-                  value: 250,
-                  message: "The name cannot be longer than 250 characters.",
-                },
                 validate: validateInput,
                 onChange: (e) => setBodyVal(e.target.value),
               })}

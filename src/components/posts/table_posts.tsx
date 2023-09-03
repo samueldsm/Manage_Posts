@@ -57,14 +57,18 @@ export default function PostsTable({
     const end = start + rowsPerPage;
 
     return data.slice(start, end);
-  }, [page, data?.length, data]);
+  }, [page, data]);
   //END Pagination
 
   /* Refresh posts */
+  /*TODO: Fix Only the deletion of one post is shown at a time,
+   and if another post is deleted again, 
+   the previous element already deleted appears again  
+   */
   const handleData = (id: number) => {
-    console.log(data.filter((item) => item.id !== id));
+    // console.log(id);
+    // console.log(data.filter((item) => item.id !== id));
     setData(data.filter((item) => item.id !== id));
-    return;
   };
   /*  method: 'GET' */
   useEffect(() => {
@@ -142,16 +146,15 @@ export default function PostsTable({
           );
         case "actions":
           return (
-            <div className="relative flex items-center gap-2">
+            <div className="relative flex items-center gap-0">
               <Tooltip content="Edit post">
                 <Button
                   type="button"
                   variant="light"
                   onPress={() => handleUpdate(data.id)}
+                  className="text-lg text-default-400 cursor-pointer active:opacity-50"
                 >
-                  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <EditIcon />
-                  </span>
+                  <EditIcon />
                 </Button>
               </Tooltip>
               <Tooltip color="danger" content="Delete post">
@@ -160,10 +163,9 @@ export default function PostsTable({
                   variant="light"
                   // onPress={onOpen}
                   onClick={() => deletePost(data.id)}
+                  className="text-lg text-danger cursor-pointer active:opacity-50"
                 >
-                  <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                    <DeleteIcon />
-                  </span>
+                  <DeleteIcon />
                 </Button>
               </Tooltip>
             </div>
@@ -177,7 +179,12 @@ export default function PostsTable({
 
   return (
     <Table
+      
       aria-label="List of posts"
+      classNames={{
+        wrapper: "min-h-[222px]",
+        table: "min-w-[800px]",
+      }}
       bottomContent={
         pages > 0 ? (
           <div className="flex w-full justify-center">
@@ -193,9 +200,7 @@ export default function PostsTable({
           </div>
         ) : null
       }
-      classNames={{
-        wrapper: "min-h-[222px]",
-      }}
+      bottomContentPlacement="outside"
     >
       <TableHeader columns={columns}>
         {(column) => (
