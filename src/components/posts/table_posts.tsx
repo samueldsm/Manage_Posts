@@ -28,15 +28,13 @@ import { DeleteIcon } from "../icons/delete_icon";
 export default function PostsTable({
   data,
   setData,
+  setCleanData,
   setIsFormOpen,
-  setInitialData,
-  setNotification,
 }: {
   data: IPost[];
   setData: (arr: IPost[]) => void;
+  setCleanData: (post: IPost) => void;
   setIsFormOpen: (value: boolean) => void;
-  setInitialData: (post: IPost) => void;
-  setNotification: (value: boolean) => void;
 }) {
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,11 +59,12 @@ export default function PostsTable({
   //END Pagination
 
   /* Refresh posts */
-  /*TODO: Fix Only the deletion of one post is shown at a time,
+
+  const handleDeleteData = (id: number) => {
+    /*TODO: Fix Only the deletion of one post is shown at a time,
    and if another post is deleted again, 
    the previous element already deleted appears again  
    */
-  const handleData = (id: number) => {
     // console.log(id);
     // console.log(data.filter((item) => item.id !== id));
     setData(data.filter((item) => item.id !== id));
@@ -88,7 +87,7 @@ export default function PostsTable({
     axios
       .delete(`${API_URL}/${id}`)
       .then(() => {
-        handleData(id);
+        handleDeleteData(id);
         toast.success("Post deleted successfully ", {
           theme: "dark",
           position: "bottom-right",
@@ -117,7 +116,7 @@ export default function PostsTable({
 
   const handleUpdate = (id: number) => {
     setIsFormOpen(true);
-    setInitialData(data.find((post) => post.id === id) as IPost);
+    setCleanData(data.find((post) => post.id === id) as IPost);
   };
 
   // Render Cell Post
@@ -151,6 +150,7 @@ export default function PostsTable({
                 <Button
                   type="button"
                   variant="light"
+                  name="Edit post"
                   onPress={() => handleUpdate(data.id)}
                   className="text-lg text-default-400 cursor-pointer active:opacity-50"
                 >
@@ -161,6 +161,7 @@ export default function PostsTable({
                 <Button
                   type="button"
                   variant="light"
+                  name="Delete post"
                   // onPress={onOpen}
                   onClick={() => deletePost(data.id)}
                   className="text-lg text-danger cursor-pointer active:opacity-50"
@@ -179,7 +180,6 @@ export default function PostsTable({
 
   return (
     <Table
-      
       aria-label="List of posts"
       classNames={{
         wrapper: "min-h-[222px]",

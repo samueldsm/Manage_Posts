@@ -22,17 +22,17 @@ import { validateTrim } from "@/util/validation";
 export default function AddPostModal({
   data,
   setData,
+  cleanData,
   isFormOpen,
-  initialData,
+  setCleanData,
   setIsFormOpen,
-  setInitialData,
 }: {
   data: IPost[];
   setData: (arr: IPost[]) => void;
+  cleanData: IPost;
   isFormOpen: boolean;
-  initialData: IPost;
+  setCleanData: (post: IPost) => void;
   setIsFormOpen: (value: boolean) => void;
-  setInitialData: (post: IPost) => void;
 }) {
   const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
@@ -40,9 +40,9 @@ export default function AddPostModal({
   const [titleVal, setTitleVal] = useState<string>("");
 
   useEffect(() => {
-    initialData.title && setTitleVal(initialData.title);
-    initialData.body && setBodyVal(initialData.body);
-  }, [initialData.title, initialData.body]);
+    cleanData.title && setTitleVal(cleanData.title);
+    cleanData.body && setBodyVal(cleanData.body);
+  }, [cleanData]);
 
   // Validation not only whitespace
   const validateInput = (value: string) => validateTrim(value);
@@ -58,14 +58,14 @@ export default function AddPostModal({
     setBodyVal("");
     setTitleVal("");
     setIsFormOpen(false);
-    setInitialData({ userId: 0, title: "", body: "", id: 0 });
+    setCleanData({ userId: 0, title: "", body: "", id: 0 });
     reset();
   }
   const handleCancel = () => {
     setBodyVal("");
     setTitleVal("");
     setIsFormOpen(false);
-    setInitialData({ userId: 0, title: "", body: "", id: 0 });
+    setCleanData({ userId: 0, title: "", body: "", id: 0 });
     reset();
   };
 
@@ -116,18 +116,18 @@ export default function AddPostModal({
   /*  method: 'PUT' */
   const updatePost = async () => {
     const seed = {
-      id: initialData.id,
+      id: cleanData.id,
       title: titleVal,
       body: bodyVal,
-      userId: initialData.userId,
+      userId: cleanData.userId,
     } as IPost;
 
     axios
       .put(`${API_URL}/${seed.id}`, seed)
       .then(() => {
         const temp = [...data];
-        const index = temp.indexOf(initialData);
-        temp[index] = { ...initialData, title: titleVal, body: bodyVal };
+        const index = temp.indexOf(cleanData);
+        temp[index] = { ...cleanData, title: titleVal, body: bodyVal };
         setData(temp);
         toast.success("The post was successfully updated", {
           theme: "dark",
@@ -156,7 +156,7 @@ export default function AddPostModal({
   };
 
   const onSubmit = async () => {
-    if (initialData.id) {
+    if (cleanData.id) {
       try {
         await updatePost();
       } catch (error) {
@@ -187,7 +187,7 @@ export default function AddPostModal({
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          {initialData.title ? "Edit post" : "Add a new Post"}
+          {cleanData.title ? "Edit post" : "Add a new Post"}
         </ModalHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalBody>
@@ -195,12 +195,13 @@ export default function AddPostModal({
               type="text"
               label="Title"
               // value={titleVal}
+              value={titleVal}
               variant="bordered"
               autoFocus
               maxLength={250}
               minLength={1}
               placeholder="Enter a title"
-              defaultValue={initialData.title.length > 1 ? titleVal : ""}
+              labelPlacement="outside"
               {...register("title", {
                 required: "Title is required",
                 maxLength: {
@@ -222,11 +223,10 @@ export default function AddPostModal({
               type="text"
               key="bordered"
               label="Description"
-              // value={bodyVal}
+              value={bodyVal}
               variant="bordered"
               placeholder="Enter a description"
-              defaultValue={initialData.body.length > 1 ? bodyVal : ""}
-              // labelPlacement="outside"
+              labelPlacement="outside"
               {...register("body", {
                 required: "Description is required",
                 validate: validateInput,
@@ -245,7 +245,7 @@ export default function AddPostModal({
               type="submit"
               className="bg-[#6f4ef2] shadow-lg shadow-indigo-500/20"
             >
-              {initialData.title ? "Update post" : "Add post"}
+              {cleanData.title ? "Update post" : "Add post"}
             </Button>
           </ModalFooter>
         </form>
