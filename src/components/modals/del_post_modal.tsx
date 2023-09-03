@@ -12,6 +12,9 @@ import {
 
 import { Button } from "@nextui-org/button";
 
+/* ******************                     ****************
+        This component can be added to improve the UI 
+******************                        ****************/
 export default function DelPostModal() {
   return (
     <>

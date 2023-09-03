@@ -41,8 +41,6 @@ export default function PostsTable({
 
   const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
-  /* TODO: fixes the pagination, when starting the
-     rendering it repeats the value 1 in this component */
   //Start Pagination
   const rowsPerPage = 4;
 
@@ -53,19 +51,18 @@ export default function PostsTable({
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-
     return data.slice(start, end);
   }, [page, data]);
   //END Pagination
 
   /* Refresh posts */
-
   const handleDeleteData = (id: number) => {
-    /*TODO: Fix Only the deletion of one post is shown at a time,
+    /* ----------------------------------------------------
+    TODO: Fix -> Only the deletion of one post is shown at a time,
    and if another post is deleted again, 
    the previous element already deleted appears again  
-   */
-    // console.log(id);
+   -------------------------------------------------------*/
+    console.log(id);
     // console.log(data.filter((item) => item.id !== id));
     setData(data.filter((item) => item.id !== id));
   };

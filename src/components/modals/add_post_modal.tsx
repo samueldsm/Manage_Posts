@@ -79,7 +79,7 @@ export default function AddPostModal({
     axios
       .post(API_URL, tempPost)
       .then(() => {
-        // Always id = data.length + 1, Maybe it can throw an exception.It's only for test.
+        // Always id = data.length + 1, Maybe it can throw an exception about duplicate key .It's only for test.
         setData([
           ...data,
           {
@@ -114,7 +114,11 @@ export default function AddPostModal({
   };
 
   /*  method: 'PUT' */
+
   const updatePost = async () => {
+    /*  In this example you are not allowed to edit a post
+         that has been embedded.. 
+    */
     const seed = {
       id: cleanData.id,
       title: titleVal,
