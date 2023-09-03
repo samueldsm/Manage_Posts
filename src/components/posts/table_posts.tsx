@@ -1,7 +1,7 @@
 "use client";
 // TODO: Decompose urgent this component !!!!!.
 
-import React, { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import axios from "axios";
 
@@ -17,6 +17,7 @@ import { Button } from "@nextui-org/button";
 import { Tooltip } from "@nextui-org/tooltip";
 import { Spinner } from "@nextui-org/spinner";
 import { Pagination } from "@nextui-org/pagination";
+import { getKeyValue } from "@nextui-org/react";
 
 import { IPost } from "@/interfaces";
 
@@ -38,10 +39,27 @@ export default function PostsTable({
   setInitialData: (post: IPost) => void;
   setNotification: (value: boolean) => void;
 }) {
-  const [page, setPage] = React.useState(1);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   const API_URL = "https://jsonplaceholder.typicode.com/posts";
+
+  /* TODO: fixes the pagination, when starting the
+     rendering it repeats the value 1 in this component */
+  //Start Pagination
+  const rowsPerPage = 4;
+
+  const pages = useMemo(() => {
+    return data?.length ? Math.ceil(data.length / rowsPerPage) : 0;
+  }, [data?.length, rowsPerPage]);
+
+  const items = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    return data.slice(start, end);
+  }, [page, data?.length, rowsPerPage]);
+  //END Pagination
 
   /* Refresh posts */
   const handleData = (id: number) => {
@@ -91,20 +109,6 @@ export default function PostsTable({
         });
       });
   };
-  /* TODO: fixes the pagination, when starting the
-     rendering it repeats the value 1 in this component */
-  //Start Pagination
-  const rowsPerPage = 4;
-  const pages = Math.ceil(data.length / rowsPerPage);
-
-  const items = React.useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-
-    return data.slice(start, end);
-  }, [page, data?.length]);
-
-  //END Pagination
 
   const handleUpdate = (id: number) => {
     setIsFormOpen(true);
@@ -112,7 +116,7 @@ export default function PostsTable({
   };
 
   // Render Cell Post
-  const renderCell = React.useCallback(
+  const renderCell = useCallback(
     (data: IPost, columnKey: React.Key) => {
       const cellValue = data[columnKey as keyof IPost];
 
@@ -175,18 +179,21 @@ export default function PostsTable({
       <Table
         aria-label="List of"
         bottomContent={
-          <div className="flex w-full justify-center">
-            <Pagination
-              page={page}
-              total={pages}
-              color="secondary"
-              onChange={(page) => setPage(page)}
-              isCompact
-              showShadow
-              showControls
-            />
-          </div>
+          pages > 0 ? (
+            <div className="flex w-full justify-center">
+              <Pagination
+                isCompact
+                showControls
+                showShadow
+                color="primary"
+                page={page}
+                total={pages}
+                onChange={(page) => setPage(page)}
+              />
+            </div>
+          ) : null
         }
+        // {...args}
         classNames={{
           wrapper: "min-h-[222px]",
         }}
