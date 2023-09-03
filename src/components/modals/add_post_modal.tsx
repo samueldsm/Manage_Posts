@@ -79,13 +79,13 @@ export default function AddPostModal({
     axios
       .post(API_URL, tempPost)
       .then(() => {
-        // Always id = data.length + 1, Maybe it can throw an exception about duplicate key .It's only for test.
+        // Always id = data.length + tempPost.title.length, Maybe it can throw an exception about duplicate key .It's only for test.
         setData([
-          ...data,
           {
             ...tempPost,
-            id: data.length + 1,
+            id: data.length + tempPost.title.length,
           },
+          ...data,
         ]);
         toast.success("The post was created successfully", {
           theme: "dark",
