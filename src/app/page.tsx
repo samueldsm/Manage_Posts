@@ -5,7 +5,7 @@ import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import Notify from "@/components/toast/notify";
 import PostsTable from "@/components/posts/table_posts";
 import AddPostModal from "@/components/modals/add_post_modal";
-import FormPostButton from "@/components/modals/button_form_post";
+import FormPostButton from "@/components/buttons/button_form_post";
 
 import { IPost } from "@/interfaces";
 

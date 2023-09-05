@@ -58,10 +58,10 @@ export default function PostsTable({
   /* Refresh posts */
   const handleDeleteData = (id: number) => {
     /* ----------------------------------------------------
-    TODO: Fix -> Only the deletion of one post is shown at a time,
-   and if another post is deleted again, 
-   the previous element already deleted appears again  
-   -------------------------------------------------------*/
+  TODO: Fix -> Only the deletion of one post is shown at a time,
+  and if another post is deleted again, 
+  the previous element already deleted appears again  
+  -------------------------------------------------------*/
     console.log(id);
     // console.log(data.filter((item) => item.id !== id));
     setData(data.filter((item) => item.id !== id));

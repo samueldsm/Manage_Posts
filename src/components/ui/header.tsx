@@ -1,7 +1,7 @@
 import { Link } from "@nextui-org/link";
 import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/navbar";
 
-import { AcmeLogo } from "./acme_logo.jsx";
+import { AcmeLogo } from "../icons/acme_logo.jsx";
 
 export default function Header() {
   return (
