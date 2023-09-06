@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useState } from "react";
+
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 
 import Search from "@/components/ui/search";
@@ -21,8 +22,8 @@ export default function HomePage() {
     userId: 0,
   });
 
-  /**************** *
-   *      SEARCH    *
+  /***************** *
+   *      SEARCH     *
    * *****************/
   const [filterValue, setFilterValue] = useState("");
 
@@ -36,7 +37,8 @@ export default function HomePage() {
   }, []);
   /***************** *
    *   END SEARCH    *
-   * ****************/
+   * *****************/
+
   return (
     <>
       <Card className="purple-dark text-foreground bg-background">

@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 
-import { useGetUsersQuery } from "@/redux/services/user_api";
-import { decrement, increment, reset } from "@/redux/features/counter_slice";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-
 import axios from "axios";
+
+import { increment } from "@/redux/features/counter_id_slice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 
 import {
   Modal,
@@ -39,8 +38,13 @@ export default function AddPostModal({
   setCleanData: (post: IPost) => void;
   setIsFormOpen: (value: boolean) => void;
 }) {
-  const count = useAppSelector((state) => state.counterReducer.value);
+  /***************** *
+   *       Axios     *
+   * *****************/
+  const countId = useAppSelector((state) => state.counterIdReducer.value);
   const dispatch = useAppDispatch();
+
+  /***************************/
 
   const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
@@ -87,7 +91,7 @@ export default function AddPostModal({
     };
     axios
       .post(API_URL, tempPost)
-      .then((response) => {
+      .then(() => {
         /*** Correctly in a real environment :      ***
          *** setData([ response.data, ...data,]);   ***/
 
@@ -95,10 +99,11 @@ export default function AddPostModal({
         setData([
           {
             ...tempPost,
-            id: data.length + tempPost.title.length,
+            id: countId,
           },
           ...data,
         ]);
+        dispatch(increment());
         toast.success("The post was created successfully", {
           theme: "dark",
           position: "bottom-right",
