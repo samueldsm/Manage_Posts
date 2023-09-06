@@ -54,18 +54,11 @@ export default function PostsTable({
     let filteredPost = [...data];
 
     if (hasSearchFilter) {
+      setIsLoading(false);
       filteredPost = filteredPost.filter((post) =>
         post.title.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
-    // if (
-    //   statusFilter !== "all" &&
-    //   Array.from(statusFilter).length !== statusOptions.length
-    // ) {
-    //   filteredPost = filteredPost.filter((user) =>
-    //     Array.from(statusFilter).includes(user.status)
-    //   );
-    // }
 
     return filteredPost;
   }, [data, filterValue]);
@@ -207,6 +200,7 @@ export default function PostsTable({
           return cellValue;
       }
     },
+
     [data.length, data, onSearchChange]
   );
 
@@ -247,7 +241,7 @@ export default function PostsTable({
       <TableBody
         items={items}
         isLoading={isLoading && !items.length}
-        emptyContent={!isLoading && "No posts found"}
+        emptyContent={!isLoading && items.length === 0 && "No posts found"}
         loadingContent={<Spinner label="Loading..." />}
       >
         {(items) => (
