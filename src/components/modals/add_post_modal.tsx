@@ -1,6 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+
+import { useGetUsersQuery } from "@/redux/services/user_api";
+import { decrement, increment, reset } from "@/redux/features/counter_slice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+
 import axios from "axios";
 
 import {
@@ -34,6 +39,9 @@ export default function AddPostModal({
   setCleanData: (post: IPost) => void;
   setIsFormOpen: (value: boolean) => void;
 }) {
+  const count = useAppSelector((state) => state.counterReducer.value);
+  const dispatch = useAppDispatch();
+
   const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
   const [bodyVal, setBodyVal] = useState<string>("");
@@ -61,6 +69,7 @@ export default function AddPostModal({
     setCleanData({ userId: 0, title: "", body: "", id: 0 });
     reset();
   }
+
   const handleCancel = () => {
     setBodyVal("");
     setTitleVal("");
@@ -78,7 +87,10 @@ export default function AddPostModal({
     };
     axios
       .post(API_URL, tempPost)
-      .then(() => {
+      .then((response) => {
+        /*** Correctly in a real environment :      ***
+         *** setData([ response.data, ...data,]);   ***/
+
         // Always id = data.length + tempPost.title.length, Maybe it can throw an exception about duplicate key .It's only for test.
         setData([
           {
@@ -133,6 +145,7 @@ export default function AddPostModal({
         const index = temp.indexOf(cleanData);
         temp[index] = { ...cleanData, title: titleVal, body: bodyVal };
         setData(temp);
+
         toast.success("The post was successfully updated", {
           theme: "dark",
           position: "bottom-right",

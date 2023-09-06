@@ -26,33 +26,68 @@ import { EditIcon } from "../icons/edit_icon";
 import { DeleteIcon } from "../icons/delete_icon";
 
 export default function PostsTable({
+  page,
   data,
+  setPage,
   setData,
+  filterValue,
   setCleanData,
   setIsFormOpen,
+  onSearchChange,
 }: {
+  page: number;
   data: IPost[];
+  filterValue: string;
+  setPage: (value: number) => void;
   setData: (arr: IPost[]) => void;
   setCleanData: (post: IPost) => void;
   setIsFormOpen: (value: boolean) => void;
+  onSearchChange: (value?: string) => void;
 }) {
-  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
   const API_URL = "https://jsonplaceholder.typicode.com/posts";
+
+  const hasSearchFilter = Boolean(filterValue);
+
+  const filteredItems = useMemo(() => {
+    let filteredPost = [...data];
+
+    if (hasSearchFilter) {
+      filteredPost = filteredPost.filter((post) =>
+        post.title.toLowerCase().includes(filterValue.toLowerCase())
+      );
+    }
+    // if (
+    //   statusFilter !== "all" &&
+    //   Array.from(statusFilter).length !== statusOptions.length
+    // ) {
+    //   filteredPost = filteredPost.filter((user) =>
+    //     Array.from(statusFilter).includes(user.status)
+    //   );
+    // }
+
+    return filteredPost;
+  }, [data, filterValue]);
 
   //Start Pagination
   const rowsPerPage = 4;
 
   const pages = useMemo(() => {
+    // console.log("useMemo pages ");
     return data?.length ? Math.ceil(data.length / rowsPerPage) : 0;
   }, [data, data?.length]);
 
   const items = useMemo(() => {
+    // console.log("useMemo items ");
     const start = (page - 1) * rowsPerPage;
+    // console.log("Start: ", start)
+    /**** rowsPerPage make the issue */
     const end = start + rowsPerPage;
-    return data.slice(start, end);
-  }, [page, data]);
+    // console.log("End: ", end)
+    // console.log("Data: ", data.slice(start, end))
+    return filteredItems.slice(start, end);
+  }, [page, filteredItems]);
   //END Pagination
 
   /* Refresh posts */
@@ -62,7 +97,7 @@ export default function PostsTable({
   and if another post is deleted again, 
   the previous element already deleted appears again  
   -------------------------------------------------------*/
-    console.log(id);
+    // console.log("HandleDeleteData ", id);
     // console.log(data.filter((item) => item.id !== id));
     setData(data.filter((item) => item.id !== id));
   };
@@ -172,7 +207,7 @@ export default function PostsTable({
           return cellValue;
       }
     },
-    [data.length, data]
+    [data.length, data, onSearchChange]
   );
 
   return (
@@ -212,7 +247,8 @@ export default function PostsTable({
       <TableBody
         items={items}
         isLoading={isLoading && !items.length}
-        loadingContent={<Spinner />}
+        emptyContent={!isLoading && "No posts found"}
+        loadingContent={<Spinner label="Loading..." />}
       >
         {(items) => (
           <TableRow key={items.id}>
