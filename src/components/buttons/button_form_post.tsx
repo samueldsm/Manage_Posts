@@ -1,10 +1,10 @@
 import { Button } from "@nextui-org/react";
 
-export default function FormPostButton({
+const FormPostButton = ({
   setIsFormOpen,
 }: {
   setIsFormOpen: (value: boolean) => void;
-}) {
+}) => {
   return (
     <Button
       type="button"
@@ -16,4 +16,5 @@ export default function FormPostButton({
       Add a new post
     </Button>
   );
-}
+};
+export default FormPostButton;

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-
-import axios from "axios";
+import { useEffect, useState } from "react";
 
 import { increment } from "@/redux/features/counter_id_slice";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+
+import axios from "axios";
 
 import {
   Modal,
@@ -23,7 +23,9 @@ import { useForm } from "react-hook-form";
 import { IPost } from "@/interfaces";
 import { validateTrim } from "@/util/validation";
 
-export default function AddPostModal({
+const baseURL = "https://jsonplaceholder.typicode.com/posts";
+
+const AddPostModal = ({
   data,
   setData,
   cleanData,
@@ -37,17 +39,7 @@ export default function AddPostModal({
   isFormOpen: boolean;
   setCleanData: (post: IPost) => void;
   setIsFormOpen: (value: boolean) => void;
-}) {
-  /***************** *
-   *       Axios     *
-   * *****************/
-  const countId = useAppSelector((state) => state.counterIdReducer.value);
-  const dispatch = useAppDispatch();
-
-  /***************************/
-
-  const API_URL = "https://jsonplaceholder.typicode.com/posts";
-
+}) => {
   const [bodyVal, setBodyVal] = useState<string>("");
   const [titleVal, setTitleVal] = useState<string>("");
 
@@ -56,8 +48,8 @@ export default function AddPostModal({
     cleanData.body && setBodyVal(cleanData.body);
   }, [cleanData]);
 
-  // Validation not only whitespace
-  const validateInput = (value: string) => validateTrim(value);
+  const countId = useAppSelector((state) => state.counterId.value);
+  const dispatch = useAppDispatch();
 
   const {
     reset,
@@ -66,115 +58,12 @@ export default function AddPostModal({
     formState: { errors },
   } = useForm();
 
-  function handleFormClose(): void {
+  const handleCancelOrClose = () => {
     setBodyVal("");
     setTitleVal("");
     setIsFormOpen(false);
     setCleanData({ userId: 0, title: "", body: "", id: 0 });
     reset();
-  }
-
-  const handleCancel = () => {
-    setBodyVal("");
-    setTitleVal("");
-    setIsFormOpen(false);
-    setCleanData({ userId: 0, title: "", body: "", id: 0 });
-    reset();
-  };
-
-  /*  method: 'POST' */
-  const createPost = async () => {
-    const tempPost = {
-      body: bodyVal,
-      title: titleVal,
-      userId: 1,
-    };
-    axios
-      .post(API_URL, tempPost)
-      .then(() => {
-        /*** Correctly in a real environment :      ***
-         *** setData([ response.data, ...data,]);   ***/
-
-        // Always id = data.length + tempPost.title.length, Maybe it can throw an exception about duplicate key .It's only for test.
-        setData([
-          {
-            ...tempPost,
-            id: countId,
-          },
-          ...data,
-        ]);
-        dispatch(increment());
-        toast.success("The post was created successfully", {
-          theme: "dark",
-          position: "bottom-right",
-          progress: undefined,
-          draggable: true,
-          autoClose: 5000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          hideProgressBar: false,
-        });
-      })
-      .catch((error) => {
-        console.error("Error in POST method", error);
-        toast.error("Error during insert", {
-          theme: "dark",
-          position: "bottom-right",
-          progress: undefined,
-          autoClose: 5000,
-          draggable: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          hideProgressBar: false,
-        });
-      });
-  };
-
-  /*  method: 'PUT' */
-
-  const updatePost = async () => {
-    /*  In this example you are not allowed to edit a post
-         that has been embedded.. 
-    */
-    const seed = {
-      id: cleanData.id,
-      title: titleVal,
-      body: bodyVal,
-      userId: cleanData.userId,
-    } as IPost;
-
-    axios
-      .put(`${API_URL}/${seed.id}`, seed)
-      .then(() => {
-        const temp = [...data];
-        const index = temp.indexOf(cleanData);
-        temp[index] = { ...cleanData, title: titleVal, body: bodyVal };
-        setData(temp);
-
-        toast.success("The post was successfully updated", {
-          theme: "dark",
-          position: "bottom-right",
-          progress: undefined,
-          draggable: true,
-          autoClose: 5000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          hideProgressBar: false,
-        });
-      })
-      .catch((error) => {
-        console.log("Error in PUT method", error);
-        toast.error("Error during update", {
-          theme: "dark",
-          position: "bottom-right",
-          progress: undefined,
-          autoClose: 5000,
-          draggable: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          hideProgressBar: false,
-        });
-      });
   };
 
   const onSubmit = async () => {
@@ -191,13 +80,72 @@ export default function AddPostModal({
         console.log("Error during creation: ", error);
       }
     }
-    handleCancel();
+    handleCancelOrClose();
   };
+
+  /*  method: 'POST' */
+  const createPost = async () => {
+    const tempPost = {
+      body: bodyVal,
+      title: titleVal,
+      userId: 1,
+    };
+    await axios
+      .post(baseURL, tempPost)
+      .then(() => {
+        /* Correctly in a real environment : setData([ response.data, ...data,]); */
+        setData([
+          {
+            ...tempPost,
+            id: countId,
+          },
+          ...data,
+        ]);
+        dispatch(increment());
+        toast.success("The post was created successfully");
+      })
+      .catch((error) => {
+        console.error("Error in POST method", error);
+        toast.error("Error during insert");
+      });
+  };
+
+  /*  method: 'PUT' */
+
+  const updatePost = async () => {
+    /*  In this example you are not allowed to edit a post
+         that has been embedded. Because it's a fake API
+    */
+    const seed = {
+      id: cleanData.id,
+      title: titleVal,
+      body: bodyVal,
+      userId: cleanData.userId,
+    } as IPost;
+
+    axios
+      .put(`${baseURL}/${seed.id}`, seed)
+      .then(() => {
+        const temp = [...data];
+        const index = temp.indexOf(cleanData);
+        temp[index] = { ...cleanData, title: titleVal, body: bodyVal };
+        setData(temp);
+
+        toast.success("The post was successfully updated");
+      })
+      .catch((error) => {
+        console.log("Error in PUT method", error);
+        toast.error("Error during update");
+      });
+  };
+
+  // Validation not only whitespace
+  const validateInput = (value: string) => validateTrim(value);
 
   return (
     <Modal
       isOpen={isFormOpen}
-      onClose={handleFormClose}
+      onClose={handleCancelOrClose}
       backdrop="blur"
       classNames={{
         body: "py-6",
@@ -216,7 +164,6 @@ export default function AddPostModal({
             <Input
               type="text"
               label="Title"
-              // value={titleVal}
               value={titleVal}
               variant="bordered"
               autoFocus
@@ -260,7 +207,11 @@ export default function AddPostModal({
             )}
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" variant="light" onClick={handleCancel}>
+            <Button
+              color="primary"
+              variant="light"
+              onClick={handleCancelOrClose}
+            >
               Cancel
             </Button>
             <Button
@@ -274,4 +225,6 @@ export default function AddPostModal({
       </ModalContent>
     </Modal>
   );
-}
+};
+
+export default AddPostModal;
