@@ -1,6 +1,7 @@
 "use client";
+// TODO: Decompose urgent this component !!!!!.
 
-import { Key, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import axios from "axios";
 
@@ -17,17 +18,14 @@ import { Tooltip } from "@nextui-org/tooltip";
 import { Spinner } from "@nextui-org/spinner";
 import { Pagination } from "@nextui-org/pagination";
 
-import { toast } from "react-toastify";
+import { IPost } from "@/interfaces";
 
+import { toast } from "react-toastify";
 import { columns } from "./columns";
 import { EditIcon } from "../icons/edit_icon";
 import { DeleteIcon } from "../icons/delete_icon";
 
-import { IPost } from "@/interfaces";
-
-const baseURL = "https://jsonplaceholder.typicode.com/posts";
-
-const PostsTable = ({
+export default function PostsTable({
   page,
   data,
   setPage,
@@ -35,32 +33,21 @@ const PostsTable = ({
   filterValue,
   setCleanData,
   setIsFormOpen,
+  onSearchChange,
 }: {
   page: number;
   data: IPost[];
+  filterValue: string;
   setPage: (value: number) => void;
   setData: (arr: IPost[]) => void;
-  filterValue: string;
   setCleanData: (post: IPost) => void;
   setIsFormOpen: (value: boolean) => void;
-}) => {
+  onSearchChange: (value?: string) => void;
+}) {
   const [isLoading, setIsLoading] = useState(true);
 
-  /*  method: 'GET' */
-  useEffect(() => {
-    axios
-      .get(`${baseURL}`)
-      .then((response) => {
-        setData(response.data as IPost[]);
-      })
-      .catch((error) => {
-        console.error("Error fetching posts: ", error);
-      });
-  }, []);
+  const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
-  /* The `filteredItems` constant is using the `useMemo` 
-  hook to memoize the filtered posts based on
-  the search filter value. */
   const hasSearchFilter = Boolean(filterValue);
 
   const filteredItems = useMemo(() => {
@@ -72,55 +59,95 @@ const PostsTable = ({
         post.title.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
+
     return filteredPost;
   }, [data, filterValue]);
 
   //Start Pagination
   const rowsPerPage = 4;
+
   const pages = useMemo(() => {
+    // console.log("useMemo pages ");
     return data?.length ? Math.ceil(data.length / rowsPerPage) : 0;
   }, [data, data?.length]);
 
   const items = useMemo(() => {
+    // console.log("useMemo items ");
     const start = (page - 1) * rowsPerPage;
+    // console.log("Start: ", start)
+    /**** rowsPerPage make the issue */
     const end = start + rowsPerPage;
-
-    console.log("iTEMS:", filteredItems);
+    // console.log("End: ", end)
+    // console.log("Data: ", data.slice(start, end))
     return filteredItems.slice(start, end);
   }, [page, filteredItems]);
   //END Pagination
 
-  const handleUpdate = (id: number) => {
-    const editableData = data.find((post) => post.id === id);
-    setCleanData(editableData as IPost);
-    console.log(id);
-    setIsFormOpen(true);
-  };
-
+  /* Refresh posts */
   const handleDeleteData = (id: number) => {
-    const remainingData = data.filter((item) => item.id !== id);
-    setData(remainingData);
+    /* ----------------------------------------------------
+  TODO: Fix -> Only the deletion of one post is shown at a time,
+  and if another post is deleted again, 
+  the previous element already deleted appears again  
+  -------------------------------------------------------*/
+    // console.log("HandleDeleteData ", id);
+    // console.log(data.filter((item) => item.id !== id));
+    setData(data.filter((item) => item.id !== id));
   };
+  /*  method: 'GET' */
+  useEffect(() => {
+    try {
+      const getPost = async () => {
+        const { data: res } = await axios.get(`${API_URL}`);
+        setData(res);
+      };
+      getPost();
+    } catch (error) {
+      console.error("Error fetching posts: ", error);
+    }
+  }, []);
 
   /* method: 'DELETE' */
   const deletePost = async (id: number) => {
-    console.log(renderCell.length);
-    await axios
-      .delete(`${baseURL}/${id}`)
+    axios
+      .delete(`${API_URL}/${id}`)
       .then(() => {
         handleDeleteData(id);
-        toast.success("Post deleted successfully");
+        toast.success("Post deleted successfully ", {
+          theme: "dark",
+          position: "bottom-right",
+          progress: undefined,
+          draggable: true,
+          autoClose: 5000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          hideProgressBar: false,
+        });
       })
       .catch((error) => {
         console.error("Error deleting post: ", error);
-        toast.error("Error deleting post");
+        toast.error("Error deleting post", {
+          theme: "dark",
+          position: "bottom-right",
+          progress: undefined,
+          autoClose: 5000,
+          draggable: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          hideProgressBar: false,
+        });
       });
+  };
+
+  const handleUpdate = (id: number) => {
+    setIsFormOpen(true);
+    setCleanData(data.find((post) => post.id === id) as IPost);
   };
 
   // Render Cell Post
   const renderCell = useCallback(
-    (item: IPost, columnKey: Key) => {
-      const cellValue = item[columnKey as keyof IPost];
+    (data: IPost, columnKey: React.Key) => {
+      const cellValue = data[columnKey as keyof IPost];
 
       switch (columnKey) {
         case "id":
@@ -149,7 +176,7 @@ const PostsTable = ({
                   type="button"
                   variant="light"
                   name="Edit post"
-                  onPress={() => handleUpdate(item.id)}
+                  onPress={() => handleUpdate(data.id)}
                   className="text-lg text-default-400 cursor-pointer active:opacity-50"
                 >
                   <EditIcon />
@@ -160,9 +187,8 @@ const PostsTable = ({
                   type="button"
                   variant="light"
                   name="Delete post"
-                  //Add delete confirmation
                   // onPress={onOpen}
-                  onClick={() => deletePost(item.id)}
+                  onClick={() => deletePost(data.id)}
                   className="text-lg text-danger cursor-pointer active:opacity-50"
                 >
                   <DeleteIcon />
@@ -174,7 +200,8 @@ const PostsTable = ({
           return cellValue;
       }
     },
-    [data]
+
+    [data.length, data, onSearchChange]
   );
 
   return (
@@ -188,13 +215,13 @@ const PostsTable = ({
         pages > 0 ? (
           <div className="flex w-full justify-center">
             <Pagination
+              isCompact
+              showControls
+              showShadow
+              color="primary"
               page={page}
               total={pages}
-              color="primary"
               onChange={(page) => setPage(page)}
-              isCompact
-              showShadow
-              showControls
             />
           </div>
         ) : null
@@ -202,9 +229,12 @@ const PostsTable = ({
       bottomContentPlacement="outside"
     >
       <TableHeader columns={columns}>
-        {({ uid, name }) => (
-          <TableColumn key={uid} align={uid === "actions" ? "center" : "start"}>
-            {name}
+        {(column) => (
+          <TableColumn
+            key={column.uid}
+            align={column.uid === "actions" ? "center" : "start"}
+          >
+            {column.name}
           </TableColumn>
         )}
       </TableHeader>
@@ -214,16 +244,14 @@ const PostsTable = ({
         emptyContent={!isLoading && items.length === 0 && "No posts found"}
         loadingContent={<Spinner label="Loading..." />}
       >
-        {(item) => (
-          <TableRow key={item.id}>
+        {(items) => (
+          <TableRow key={items.id}>
             {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey)}</TableCell>
+              <TableCell>{renderCell(items, columnKey)}</TableCell>
             )}
           </TableRow>
         )}
       </TableBody>
     </Table>
   );
-};
-
-export default PostsTable;
+}

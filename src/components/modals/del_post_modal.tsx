@@ -15,7 +15,7 @@ import { Button } from "@nextui-org/button";
 /* ******************                     ****************
         This component can be added to improve the UI 
 ******************                        ****************/
-const DelPostModal = () => {
+export default function DelPostModal() {
   return (
     <>
       <Modal
@@ -45,7 +45,7 @@ const DelPostModal = () => {
                 <Button color="primary" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button type="submit" onPress={onClose} color="danger" variant="bordered">
+                <Button onPress={onClose} color="danger" variant="bordered">
                   Yes, delete
                 </Button>
               </ModalFooter>
@@ -55,6 +55,4 @@ const DelPostModal = () => {
       </Modal>
     </>
   );
-};
-
-export default DelPostModal;
+}

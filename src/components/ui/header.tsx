@@ -3,7 +3,7 @@ import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/navbar";
 
 import { AcmeLogo } from "../icons/acme_logo.jsx";
 
-const Header = () => {
+export default function Header() {
   return (
     <Navbar>
       <NavbarContent justify="start">
@@ -16,5 +16,4 @@ const Header = () => {
       </NavbarContent>
     </Navbar>
   );
-};
-export default Header;
+}
