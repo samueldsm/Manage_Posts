@@ -65,20 +65,19 @@ const PostsTable = ({
 
   const filteredItems = useMemo(() => {
     let filteredPost = [...data];
+
     if (hasSearchFilter) {
       setIsLoading(false);
       filteredPost = filteredPost.filter((post) =>
         post.title.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
-    console.log("Filtered Items:", filteredPost);
     return filteredPost;
   }, [data, filterValue]);
 
   //Start Pagination
   const rowsPerPage = 4;
   const pages = useMemo(() => {
-    console.log("Pages:", data);
     return data?.length ? Math.ceil(data.length / rowsPerPage) : 0;
   }, [data, data?.length]);
 
@@ -88,7 +87,7 @@ const PostsTable = ({
 
     console.log("iTEMS:", filteredItems);
     return filteredItems.slice(start, end);
-  }, []);
+  }, [page, filteredItems]);
   //END Pagination
 
   const handleUpdate = (id: number) => {

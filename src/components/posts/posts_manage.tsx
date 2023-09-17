@@ -10,10 +10,10 @@ import FormPostButton from "@/components/buttons/button_form_post";
 import { IPost } from "@/interfaces";
 
 const PostsManage = () => {
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState(1);
   const [data, setData] = useState<IPost[]>([]);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
-  const [filterValue, setFilterValue] = useState<string>("");
+  const [filterValue, setFilterValue] = useState("");
 
   const [cleanData, setCleanData] = useState<IPost>({
     id: 0,
